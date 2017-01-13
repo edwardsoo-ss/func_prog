@@ -16,6 +16,7 @@ Concise; delcarative functional code can express complex computation in few line
 * Real problem requires side effects
 * Not all problem can be easily modeled as pure functions
 * Performance; imperative solutions are sometimes more efficient for computer architecture we have
+* Most languages have some elements of functional programming
 
 # Some key concepts in functional programming found in Java and Groovy:
 ## First-class functions
@@ -77,9 +78,98 @@ val curriedAdd: Int => Int => Int = x => y => add(x, y)
 curriedAdd(2)(3) // 5
 ```
 
-## Functor and Monads in Java and Groovy
+## Immutability
+immutable objects cannot be modified so they are thread-safe
+
+### immutable value/variable/reference
+In Java and Groovy this is done by `final`
+
+In Scala this is done by value assignment vs variable assigment 
+```scala
+val x = 1
+var y = 1
+x = 2 // compile error
+y = 2 // ok
+```
+
+### Immutable objects
+Java string is immutable.
+In Scala classes can be immutable or mutable
+```scala
+val map1 = Map(
+  1 -> 2,
+  2 -> 4
+)
+val map2 = map1.updated(3, 6) // produces a new map Map(1 -> 2, 2 -> 4, 3 -> 6), map1 is unmodified
+
+val map3 = scala.collection.mutable.Map[Int,Int] = Map(1 -> 2)
+map3.update(1,3) // modifies map3
+
+```
+
+## Lazy evaluation
+The concept of delaying evaulation of an expression until its value is needed
+* flow control (expression evalutaion using binding and substitution is usually done in a DFS fashion)
+* allows evaluation of part of a potentially infinite data structure
+
+In Java this is found in if/else and short-circuit evaluation:
+```java
+int x = (1 > 0) ? 1 : largest_prime(1 << 32); // largest_prime not evaluated
+bool b = true || (largest_prime(1 << 32) > 1); // largest_prime not evaluated
+```
+In Groovy this is done by closure without argument
+```Groovy
+def number = 1 
+def eagerGString = "value == ${number}"
+def lazyGString = "value == ${ -> number }"
+
+assert eagerGString == "value == 1" 
+assert lazyGString ==  "value == 1"
+```
+
+In Scala, there are call-by-value and call-by-name parameters
+```scala
+def foo(a: =>  Unit): Unit = {
+  print("world")
+  a
+}
+def bar(a: Unit): Unit = {
+  print("world")
+  a
+}
+foo(print("hello")) // prints world hello
+bar(print("hello")) // prints hello world
+```
+
+```scala
+val fibs: Stream[Int] = 0 #:: 1 #:: (fibs zip fibs.tail).map{ t => t._1 + t._2 }
+fibs(10) // 55
+```
+
+## Functors and Monads in Java and Groovy
+Functor: any container data type `C[T]` that supports `map[T, U](c: C[T], f: T => U): C[U]`
+
+Monad: any container data type `C[T]` that supports `flatMap[T, U](c: C[T], f; T => C[U]): C[U]`
+
 `map` and `flatMap` (they come in different names depending on the library used) are commonly seen methods. The classes defining `map` and `flatMap` represent some computational context, containing potentially one or more values. e.g. `java.util.stream`, `java.util.Optional`, `ratpack.exec.Promise`, `com.google.common.util.concurrent.ListenableFuture`, `scala.concurrent.Future`
 They aim to make chaining of operations easier, so the developer can just declare the steps in the chain/pipeline.
+
+Zero elements: exceptions and undefined captured as value
+```scala
+maybeInt: Option[Int] = None
+ints: List[Int] = List() // Nil
+triedInt: Try[Int] = Try(throw new Exception())
+eventualInt: Try[Int] = Future(throw new Exception())
+```
+most `map` and `flatMap` implementation defines the behavior of applying a transform to an empty container as no-op
+```scala
+def echo: Int => Try[Int] = i => Try{
+  println(i)
+  i
+}
+def fail: Int => Try[Int] = _ => Failure(new Exception())
+Try(1).flatMap(failed).flatMap(echo) // Failure(java.lang.Exception), does not print
+```
 
 futures in Scala
 ```scala

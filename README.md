@@ -17,7 +17,7 @@ Concise; delcarative functional code can express complex computation in few line
 * Not all problem can be easily modeled as pure functions
 * Performance; imperative solutions are sometimes more efficient for computer architecture we have
 
-# Some key concepts in functional programming:
+# Some key concepts in functional programming found in Java and Groovy:
 ## First-class functions
 Functions that can be assigned and passed as arguments to other functions, as do other primitive or object variables.
 
@@ -77,6 +77,7 @@ val curriedAdd: Int => Int => Int = x => y => add(x, y)
 curriedAdd(2)(3) // 5
 ```
 
-## Type inference
+## Functor and Monads in Java and Groovy
+`map` and `flatMap` (they come in different names depending on the library used) are commonly seen methods. The classes defining `map` and `flatMap` represent some computational context, containing potentially one or more values. e.g. `java.util.stream`, `java.util.Optional`, `ratpack.exec.Promise`, `com.google.common.util.concurrent.ListenableFuture`, `scala.concurrent.Future`
+They aim to make chaining of operations easier, so the developer can just declare the steps in the chain/pipeline.
 
-## Pattern matching

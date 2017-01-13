@@ -81,3 +81,31 @@ curriedAdd(2)(3) // 5
 `map` and `flatMap` (they come in different names depending on the library used) are commonly seen methods. The classes defining `map` and `flatMap` represent some computational context, containing potentially one or more values. e.g. `java.util.stream`, `java.util.Optional`, `ratpack.exec.Promise`, `com.google.common.util.concurrent.ListenableFuture`, `scala.concurrent.Future`
 They aim to make chaining of operations easier, so the developer can just declare the steps in the chain/pipeline.
 
+futures in Scala
+```scala
+trait Service[T, U] {
+  def call(t: T): Future[U]
+}
+
+val serviceA: Service[Int, Int]
+val serviceB: Service[Int, Double]
+val serviceC: Service[Double, String]
+
+// style 1
+serviceA.call(1000)
+  .flatMap(int =>serviceB.call(int))
+  .flatMap(str => serviceC.call(str))
+  .recover {
+    case e: SocketTimeoutException => "500" 
+  }
+
+// style 2
+val eventualStr = for {
+  aInt <- serviceA.call(1000)
+  bDou <- serviceB.call(aInt)
+  cStr <- serviceC.call(bDou)
+} yield cStr
+eventualStr.recover {
+  case e: SocketTimeoutException => "500"
+}
+```

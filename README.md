@@ -159,7 +159,7 @@ Zero elements: exceptions and undefined captured as value
 maybeInt: Option[Int] = None
 ints: List[Int] = List() // Nil
 triedInt: Try[Int] = Try(throw new Exception())
-eventualInt: Try[Int] = Future(throw new Exception())
+eventualInt: Future[Int] = Future(throw new Exception())
 ```
 most `map` and `flatMap` implementation defines the behavior of applying a transform to an empty container as no-op
 ```scala
